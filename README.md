@@ -39,7 +39,8 @@ On top of that: the higher of lexical and semantic scores, a small bonus per kin
 
 ## Install
 
-Download **Concordance.zip** from [Releases](../../releases), unzip, and open. macOS will ask once for Desktop,
+Download **Concordance-…-macOS-arm64.dmg** from [Releases](../../releases), open it, and drag the app to
+Applications. (A zip of the same notarized app is there too, for scripted installs.) macOS will ask once for Desktop,
 Documents and Downloads access. The first launch opens a short setup: it fetches the model (≈1 GB, one time),
 prepares it for your Neural Engine (a few minutes, once per Mac), helps you pick a free shortcut, and lets you
 choose which folders to index. [Everpaper](https://everpaper.app) users: Concordance notices when its sibling is
