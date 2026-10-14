@@ -1,0 +1,9 @@
+.build/
+build/
+dist/
+.swiftpm/
+.DS_Store
+Vendor/
+# Internal design material, not part of the public project
+docs/EVERPAPER-ONBOARDING-WARM-GLASS-BRIEF.md
+docs/warm-glass-reference/

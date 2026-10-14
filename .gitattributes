@@ -1,0 +1,4 @@
+# Zip release artifacts contain the app; keep binaries out of text diffs.
+dist/** -diff
+*.icns -diff
+*.png -diff
