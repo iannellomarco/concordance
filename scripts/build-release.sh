@@ -47,15 +47,16 @@ mkdir -p "$ROOT/dist/.dmg-staging/.background"
 swift "$ROOT/scripts/render-dmg-background.swift" "$BG"
 ln -s /Applications "$ROOT/dist/.dmg-staging/Applications"
 cp -R "$APP" "$ROOT/dist/.dmg-staging/Concordance.app"
-rm -f "$DMG"
-hdiutil create -volname "Concordance" -srcfolder "$ROOT/dist/.dmg-staging" -ov -format UDBZ "$DMG"
-# Window 720x420 to match the background; icons: app left, Applications right.
-# (macOS 27 Finder: `update` and closed-window `toolbar visible` are gone; set the background from the
-# mounted volume's POSIX path, and keep the window open while scripting.)
-hdiutil attach "$DMG" -mountpoint "/Volumes/Concordance" -nobrowse >/dev/null
+rm -f "$DMG" "$ROOT/dist/.dmg-rw.dmg"
+# The layout (window bounds, background, icon positions) lives in the volume's .DS_Store, which Finder can only
+# write on a READ-WRITE image. So: create UDRW → script the layout (Finder persists .DS_Store) → convert to UDBZ.
+hdiutil create -volname "Concordance" -srcfolder "$ROOT/dist/.dmg-staging" -ov -format UDRW "$ROOT/dist/.dmg-rw.dmg" >/dev/null
+hdiutil attach "$ROOT/dist/.dmg-rw.dmg" -mountpoint "/Volumes/ConcordanceRW" -nobrowse >/dev/null
+# macOS 27 Finder: `update` and closed-window `toolbar visible` are gone; keep the window open while scripting
+# and reference the background via the mounted volume's POSIX path.
 osascript <<APPLESCRIPT
 tell application "Finder"
-  tell disk "Concordance"
+  tell disk "ConcordanceRW"
     open
     delay 1
     set current view of container window to icon view
@@ -63,13 +64,18 @@ tell application "Finder"
     set theOptions to icon view options of container window
     set arrangement of theOptions to not arranged
     set icon size of theOptions to 128
-    set background picture of theOptions to (POSIX file "/Volumes/Concordance/.background/background.png" as alias)
+    set background picture of theOptions to (POSIX file "/Volumes/ConcordanceRW/.background/background.png" as alias)
     set position of item "Concordance" of container window to {190, 175}
     set position of item "Applications" of container window to {530, 175}
   end tell
 end tell
 APPLESCRIPT
-hdiutil detach "/Volumes/Concordance" >/dev/null
+sleep 3   # let Finder flush the .DS_Store
+[[ -f /Volumes/ConcordanceRW/.DS_Store ]] || { echo "Finder did not write .DS_Store; DMG would open unstyled"; exit 1; }
+hdiutil detach "/Volumes/ConcordanceRW" >/dev/null
+sleep 1
+hdiutil convert "$ROOT/dist/.dmg-rw.dmg" -format UDBZ -o "$DMG" >/dev/null
+rm -f "$ROOT/dist/.dmg-rw.dmg"
 
 echo "→ notarizing the DMG"
 xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" --wait
