@@ -1,0 +1,16 @@
+name: CI
+on:
+  push: { branches: [main] }
+  pull_request:
+
+jobs:
+  build:
+    runs-on: [self-hosted, macOS]   # needs macOS 27 + Core AI; hosted runners don't have it yet
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch model
+        run: scripts/fetch-model.sh
+      - name: Build
+        run: swift build
+      - name: Smoke (lexical, no model)
+        run: swift build --product concordance-cli && .build/debug/concordance-cli query safari --lexical | head -3
