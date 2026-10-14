@@ -159,10 +159,17 @@ struct WelcomeStep: View {
             Spacer(minLength: 0)
             HeroOrb(size: 112).entrance(0)
             VStack(spacing: 12) {
-                Text("Concordance")
-                    .font(Paper.serif(60, .medium))
-                    .tracking(-0.8)
-                    .foregroundStyle(Paper.inkPrimary)
+                HStack(alignment: .firstTextBaseline, spacing: 14) {
+                    Text("Concordance")
+                        .font(Paper.serif(60, .medium))
+                        .tracking(-0.8)
+                        .foregroundStyle(Paper.inkPrimary)
+                    // The mono face's baseline sits slightly high against the serif; nudge it down to meet it.
+                    Text("by everpaper.app")
+                        .font(Paper.mono(15))
+                        .foregroundStyle(Paper.tint)
+                        .offset(y: 3)
+                }
                 Text("Find anything on your Mac by what it means,\nnot just by what it's called.")
                     .font(Paper.serifItalic(19))
                     .multilineTextAlignment(.center)
